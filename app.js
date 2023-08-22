@@ -7,7 +7,15 @@ const app = express();
 app.set("view engine", "ejs");
 
 app.use(bp.urlencoded({extended:true}))
-mongoose.connect('mongodb://127.0.0.1:27017/todolistDB');
+
+
+const mongodbUrl = process.env.MONGODB_URL || 'mongodb+srv://Isha:isha2002@cluster0.vn8cz.mongodb.net/toDoListDB?retryWrites=true&w=majority';
+mongoose.connect(mongodbUrl, { useNewUrlParser: true, useUnifiedTopology: true }).then(()=>{
+    console.log("connection made successfully");
+}).catch(error=> {
+    console.log(error);
+})
+
 const items = new mongoose.Schema({
     name:{
         type: String,
@@ -101,14 +109,22 @@ app.post("/", function(req,res){
         name: t
     });
     if(val === "today"){
-        l1.save();
+        l1.save().then(()=>{
+            console.log("successfully saved into database");
+        }).catch(e=>{
+            console.log(e);
+        });
         res.redirect('/')
     }
     else{
         sagar.findOne({name:val}).then(foundlist=>{
             console.log(foundlist);
             foundlist.cust.push(l1);
-            foundlist.save();
+            foundlist.save().then(()=>{
+                console.log("successfully saved into database");
+            }).catch(e=>{
+                console.log(e);
+            });
             res.redirect("/"+val);
         }).catch(err=>{
             console.log(err);
